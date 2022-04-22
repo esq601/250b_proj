@@ -27,8 +27,8 @@ parameters {
 model {
   real alpha;
   real beta;
-  alpha = 1.0;
-  beta = 1.0;
+  alpha = 2.0;
+  beta = 2.0;
   lambda ~ gamma(alpha,beta);
   Y ~ exponential(lambda);
 }
