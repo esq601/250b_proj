@@ -46,6 +46,25 @@ R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
 }
 
 
+pdf_R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
+ 
+  p <- 0
+  
+  if(t <= tau) {
+    for(i in 0:j) {
+      p_temp <- faults(i,L,W) * (i*lambda*((1-exp(-t*lambda))^(i-1))*exp(lambda*t*(-(m-i))-lambda*t)) - (lambda*(m-i)*((1-exp(-t*lamba))^i) * exp(lambda*t*(-(m-a))))
+      p <- p + p_temp
+    }
+    
+  } else {
+    for(i in 0:j) {
+      p_temp <- faults(i,L,W)*
+      
+    }
+  }
+   
+}
+
 R_g(2,4,2,10,20,.0024,10,10)
 
 
@@ -60,6 +79,9 @@ for(i in seq(from =1,to = 50, by = .1)) {
   df <- bind_rows(df,data.frame(t=i,rc = R_c(t=i,tau=tau, alpha = alp, beta = bet),R_g = R_g(64,120,2,t=i,tau,.0024,alp,bet)))
     
 }
+
+
+
 
 
 ggplot(df) +

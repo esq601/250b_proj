@@ -6,7 +6,7 @@ library(tidyverse)
 
 
 lambda <- 1
-dat <- rexp(200, lambda)
+dat <- rexp(18, lambda)
 mean(dat)
 len <- length(dat)
 
