@@ -58,7 +58,7 @@ pdf_R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
     
   } else {
     for(i in 0:j) {
-      p_temp <- faults(i,L,W)*
+      p_temp <- faults(i,L,W) * (i*(m-i)*(((t-tau)/beta)^(i-1))*((1-exp(-lambda*tau-((t-tau)/beta)^alpha))^i)*exp(-(m-i)*((t-tau)/beta)^alpha))/beta - (i*alpha*(((t-tau)/beta)^(alpha-1))*((1-exp(-lambda*tau-((t-tau)/beta)^alpha))^(i-1))*exp(-(m-i)*(((t-tau)/beta)^alpha)-lambda*tau-(((t-tau)/beta)^alpha))/beta
       
     }
   }
