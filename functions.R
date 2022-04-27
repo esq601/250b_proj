@@ -87,9 +87,9 @@ pdf_R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
 
 pdf_R_g(2,4,2,10,20,.0024,10,10)
 
-lambda <- .0024
+lambda <- .002
 alpha <- 1
-beta <- .25*1/lambda
+beta <- 30
 tau <- 20
 
 L <- 128
@@ -98,7 +98,7 @@ j <- 128
 
 df <- data.frame() 
 
-for(i in seq(from =1,to =40, by = .1)) {
+for(i in seq(from =1,to =60, by = .25)) {
   
   df <- bind_rows(df,
                   data.frame(t=i,
@@ -107,10 +107,34 @@ for(i in seq(from =1,to =40, by = .1)) {
                              f_t = pdf_R_g(j,L,W,t=i,tau,lambda,alpha,beta)))
   
 }
+df1 <- df %>%
+  mutate(R_g = 1-R_g, r_c = 1-rc) %>%
+  select(-rc) %>%
+  pivot_longer(-t) %>%
+  mutate(cum = case_when(
+    name == "f_t" ~ "PDF",
+    T ~ "CDF"
+  ))
 
-ggplot(df, aes(x = t, y = f_t)) +
-  geom_path() +
-  geom_path(aes(y = 1-R_g),color = "red")
+ggplot(df1, aes(x = t, y = value, color = name)) +
+  geom_path(size = 2) +
+  geom_vline(aes(xintercept = 17)) +
+  theme_minimal() +
+  facet_wrap(~cum,ncol=1,scales = "free_y") +
+  ggsci::scale_color_jama() +
+  labs(
+    title = "Density Functions",
+    subtitle = paste("L:",L,"W:",W,"Lambda:",lambda,"Tau:",tau,"Alpha:",alpha,"Beta:",beta),
+    color = "Type",
+    x = "t (years)"
+  ) +
+  theme(
+    text = element_text(size=16),
+    plot.background = element_rect(fill="white"),
+    axis.title.y = element_blank()
+  )
+  
+ggsave("densplot.png",dpi=320,height = 6,width = 8)
 
 
 

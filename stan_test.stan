@@ -51,7 +51,7 @@ functions{
     return part2;
   }
   
-  real rtg_pmf(int j,int L,int W,int t,real tau,
+  real rtg_lpdf(real j,real L,real W,real t,real tau,
     real lambda,real alpha,real beta){
       
     real i_r;
@@ -60,28 +60,47 @@ functions{
     real m;
     real p_temp;
     real fault_num;
+    int j_rd;
+    int L_rd;
+    int W_rd;
     
     p = 0;
     m = L*W;
     
+    j_rd = 0;
+    L_rd = 0;
+    W_rd = 0;
+    
+    while(j_rd < j) {
+      j_rd += 1;
+    }
+    
+    while(L_rd < j) {
+      L_rd += 1;
+    }
+    
+    while(W_rd < j) {
+      W_rd += 1;
+    }
+    
     if(t <= tau){
-      for(i in 0:j) {
+      for(i in 0:j_rd) {
         
         i_r = i * 1.0;
         W_r = W * 1.0;
         
-        fault_num = faults_fun(i,L,W,i_r,W_r);
+        fault_num = faults_fun(i,L_rd,W_rd,i_r,W_r);
         
         p_temp =  fault_num * -((i*lambda*((1-exp(-t*lambda))^(i-1))*exp(lambda*t*(-(m-i))-lambda*t)) - (lambda*(m-i)*((1-exp(-t*lambda))^i) * exp(lambda*t*(-(m-i)))));
         
         p = p + p_temp;
       }
     } else {
-      for(i in 0:j) {
+      for(i in 0:j_rd) {
         i_r = i * 1.0;
         W_r = W * 1.0;
         
-        fault_num = faults_fun(i,L,W,i_r,W_r);
+        fault_num = faults_fun(i,L_rd,W_rd,i_r,W_r);
         
         p_temp = fault_num * ((alpha*(m-i) * firstpart(t,tau,beta,alpha)*(1-secondpart(lambda,tau,t,alpha,beta))^i *((secondpart(lambda,tau,t,alpha,beta)^(m-i))))/beta - (alpha* i * firstpart(t,tau,beta,alpha)*(1-(secondpart(lambda,tau,t,alpha,beta)))^(i-1) *((secondpart(lambda,tau,t,alpha,beta)^(m-i+1))))/beta);
         p = p + p_temp;
@@ -120,10 +139,22 @@ model {
   real tau_b;
   real lambda_a;
   real lambda_b;
-  alpha = 2.0;
-  beta = 2.0;
-  lambda ~ gamma(alpha,beta);
-  Y ~ exponential(lambda);
+  
+  tau_a = 20.0;
+  tau_b = 1.0;
+  lambda_a = .01;
+  lambda_b = .001;
+  alpha_a = 0.5;
+  alpha_b = 2.0;
+  beta_a = 50;
+  beta_b = 0.125;
+  
+  lambda ~ uniform(lambda_a,lambda_b);
+  tau ~ gamma(tau_a,tau_b);
+  alpha ~ uniform(alpha_a,alpha_b);
+  beta ~ gamma(beta_a,beta_b);
+  
+  Y ~ rtg_lpdf(lambda);
 }
 
 generated quantities{
