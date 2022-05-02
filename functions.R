@@ -1,15 +1,6 @@
 library(tidyverse)
 
 
-mu = c(1,-1)
-
-sigma <- matrix(c(1,.5,.5,1),nrow =2)
-
-samples <- as.data.frame(MASS::mvrnorm(n=10000, mu=mu,Sigma = sigma))
-
-ggplot(samples)+
-  geom_point(aes(x=V1,y=V2))
-
 
 R_c <- function(t=0,tau=20,lambda=.0024,alpha=1,beta=1) {
   if(t <= tau) {
@@ -27,13 +18,13 @@ faults <- function(i,L,W) {
     for(k in 0:floor(i/W)){
       
       f_temp <- ((-1)^k)*(choose(L*W-k*W,i-k*W))*(choose(L,k))
-      
+      #print(choose(L*W-k*W,i-k*W))
       f <- f + f_temp
     }
   f
 }
 
-faults(2,4,2)
+faults(120,286,2)
 
 R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
   rel <- 0
@@ -62,7 +53,7 @@ pdf_R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
     for(i in 0:j) {
       
       p_temp <- faults(i,L,W) * -((i*lambda*((1-exp(-t*lambda))^(i-1))*exp(lambda*t*(-(m-i))-lambda*t)) - (lambda*(m-i)*((1-exp(-t*lambda))^i) * exp(lambda*t*(-(m-i)))))
-      
+      #print(p_temp)
       p <- p + p_temp
     }
     
@@ -78,7 +69,7 @@ pdf_R_g <- function(j,L,W,t,tau,lambda,alpha,beta){
   
 }
 
-
+pdf_R_g(143,286,2,10,20,.0024,1.52,30)
 
 #### Trials with functions ####
 
