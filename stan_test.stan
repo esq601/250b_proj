@@ -112,7 +112,7 @@ functions{
         p_temp =  fault_num * -((i*lambda*((1-exp(-t*lambda))^(i-1))*exp(lambda*t*(-(m-i))-lambda*t)) - (lambda*(m-i)*((1-exp(-t*lambda))^i) * exp(lambda*t*(-(m-i)))));
         
         if(p_temp > 0){
-          p = p + log(p_temp);
+          p = p + p_temp;
         }
         
         //print(p);
@@ -127,11 +127,12 @@ functions{
         
         p_temp = fault_num * ((alpha_val*(m-i) * firstpart(t,tau,beta_val,alpha_val)*(1-secondpart(lambda,tau,t,alpha_val,beta_val))^i *((secondpart(lambda,tau,t,alpha_val,beta_val)^(m-i))))/beta_val - (alpha_val* i * firstpart(t,tau,beta_val,alpha_val)*(1-(secondpart(lambda,tau,t,alpha_val,beta_val)))^(i-1) *((secondpart(lambda,tau,t,alpha_val,beta_val)^(m-i+1))))/beta_val);
         if(p_temp > 0){
-          p = p + log(p_temp);
+          p = p + p_temp;
         }
       }
     }
     //print(p)
+    p = log(p);
     return p;
   }
 
@@ -151,7 +152,7 @@ data {
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
   real<lower=0, upper = .004> lambda;
-  real<lower=20, upper = 30> tau;
+  real<lower=12, upper = 30> tau;
   real<lower=1> alpha_var;
   real<lower=25> beta_var;
 }
