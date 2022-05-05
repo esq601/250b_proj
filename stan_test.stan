@@ -152,9 +152,9 @@ data {
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
   real<lower=0, upper = .004> lambda;
-  real<lower=12, upper = 30> tau;
-  real<lower=1> alpha_var;
-  real<lower=25> beta_var;
+  real<lower=5, upper = 40> tau;
+  real<lower=1, upper = 5> alpha_var;
+  real<lower=25, upper = 600> beta_var;
 }
 
 // The model to be estimated. We model the output
@@ -193,4 +193,5 @@ model {
 
 generated quantities{
   real pred;
+  
 }

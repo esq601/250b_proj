@@ -1,7 +1,7 @@
 library(rstan)
 library(tidyverse)
 library(patchwork)
-
+library(rstanarm)
 
 fit <- readRDS("fit.rds")
 print(fit)
@@ -238,3 +238,6 @@ ggplot(df1, aes(x = t, y = value, color = name)) +
   )
 
 ggsave("densplot.png",dpi = 320, width = 12, height =6)
+
+
+
