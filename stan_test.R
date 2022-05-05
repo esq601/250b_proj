@@ -29,26 +29,3 @@ fit <- stan(
 )
 
 saveRDS(fit, "fit.rds")
-
-print(fit)
-
-mcmc_chain = as.matrix(fit)
-
-
-
-plot(density(mcmc_chain[,'lambda']))
-plot(density(mcmc_chain[,'tau']))
-plot(density(mcmc_chain[,'alpha_var']))
-plot(density(mcmc_chain[,'beta_var']))
-
-stan_diag(fit)
-stan_ess(fit)
-stan_dens(fit)
-stan_mcse(fit)
-stan_par(fit, par = 'lambda')
-stan_ac(fit)
-stan_plot(fit, pars = c("lambda"))
-stan_plot(fit, pars = c("tau"))
-stan_rhat(fit)
-stan_scat(fit, pars = c("tau","lambda"))
-stan_scat(fit, pars = c("alpha_var","beta_var"))
