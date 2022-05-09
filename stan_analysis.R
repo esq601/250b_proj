@@ -3,7 +3,7 @@ library(tidyverse)
 library(patchwork)
 library(rstanarm)
 
-fit <- readRDS("fit2022-05-07.rds")
+fit <- readRDS("fit2022-05-09.rds")
 print(fit)
 
 mcmc_chain = as.matrix(fit)
@@ -170,7 +170,7 @@ stan_diag(fit)
 stan_ess(fit)
 stan_dens(fit)
 stan_mcse(fit)
-stan_par(fit, par = 'lambda')
+stan_par(fit, par = 'tau')
 stan_ac(fit)
 gg1 <- stan_plot(fit, pars = c("lambda","tau","alpha_var","beta_var"))
 
@@ -241,30 +241,42 @@ ggsave("densplot.png",dpi = 320, width = 12, height =6)
 
 
 
-### with params ####
 
-mcmc_chain_df <- as.data.frame(mcmc_chain)
-L <- 208
-W <- 2
-j <- L/2
-mcmc_chain_df[1,2]
-for(i in 1:nrow(mcmc_chain_df)) {
-  
-  for(k in 1:30){
-    mcmc_chain_df[i,6+k] <- R_g(j,L,W,k,mcmc_chain_df[i,2],mcmc_chain_df[i,1],mcmc_chain_df[i,3],mcmc_chain_df[i,4])
-  }
-  
-  
-  
-  
-}
+#### Don't run!  Long time to process ####
+#### Read in chain_09may.csv for output
+#### Only run to change configuration
+# mcmc_chain_df <- as.data.frame(mcmc_chain)
+# L <- 208
+# W <- 2
+# j <- L/2
+# mcmc_chain_df[1,2]
+# for(i in 1:nrow(mcmc_chain_df)) {
+#   
+#   for(k in 1:30){
+#     mcmc_chain_df[i,6+k] <- R_g(j,L,W,k,mcmc_chain_df[i,2],mcmc_chain_df[i,1],mcmc_chain_df[i,3],mcmc_chain_df[i,4])
+#   }
+#   
+#   
+#   
+#   
+# }
+
+#write.csv(mcmc_chain_df,"chain_09may.csv")
 
 
+#### End long part
 
+#### Next Part ####
+
+
+mcmc_chain_df <- read.csv("chain_09may.csv")
 summary(mcmc_chain_df$V7)
 ggplot(mcmc_chain_df) +
-  geom_histogram(aes(x=V7))
+  geom_density(aes(x=tau))
 
+
+ggplot(mcmc_chain_df) +
+  geom_density_2d_filled(aes(x=tau, y = lambda))
 
 mcmc_chain_df <- mcmc_chain_df %>%
   select(-pred)
@@ -296,10 +308,69 @@ reldf <- mcmc_chain_df %>%
   arrange(year)
 
 ggplot(reldf,aes(x=year)) +
-  geom_path(aes(y=med_val)) +
+  geom_path(aes(y=med_val), color = "darkblue",size = 1.25) +
   geom_ribbon(aes(ymin=quant_10,ymax=quant_90), color ="transparent",
-              fill = "darkblue", alpha = 0.5) +
+              fill = "darkblue", alpha = 0.25) +
   geom_ribbon(aes(ymin=`quant_2.5`,ymax=`quant_97.5`), color ="transparent",
               fill = "darkblue", alpha = 0.25) +
   geom_vline(aes(xintercept = 17))
-  scale_y_continuous(limits = c(0,1))
+#scale_y_continuous(limits = c(0,1))
+
+ggsave("preds.png", dpi = 320, width = 10, height =6)
+
+
+
+
+mcmc_tau_split <- mcmc_chain_df %>%
+  mutate(hightau = case_when(
+    tau > 15 ~ "high",
+    TRUE ~ "low"
+  ))
+
+
+
+nums <- seq(0,.003, by = .0001)
+
+low_vals <- mcmc_tau_split %>%
+  filter(hightau == "low")
+
+ggplot(mcmc_tau_split) +
+  geom_density(aes(x = alpha_var)) +
+  facet_wrap(~hightau)
+
+fit1 <- fitdistrplus::fitdist(low_vals$alpha_var, distr = "gamma")
+
+plot(fit1)
+
+
+
+
+summary(factor(mcmc_tau_split$hightau))
+
+reldf2 <- mcmc_tau_split %>%
+  select(7:37) %>%
+  rename_all(~c(names,"hightau")) %>%
+  pivot_longer(-hightau) %>%
+  group_by(hightau,name) %>%
+  summarise(mean_val = mean(value),
+            med_val = median(value),
+            stdev = sqrt(var(value)),
+            `quant_2.5` = quantile(value,.025),
+            quant_10 = quantile(value,.1),
+            quant_90 = quantile(value,.9),
+            `quant_97.5` = quantile(value,.975)) %>%
+  mutate(year = as.numeric(name)) %>%
+  ungroup() %>%
+  arrange(year)
+
+
+
+ggplot(reldf2,aes(x=year)) +
+  geom_path(aes(y=med_val,color=hightau),size = 1.25) +
+  geom_ribbon(aes(ymin=quant_10,ymax=quant_90,fill=hightau), color ="transparent",
+               alpha = 0.25) +
+  # geom_ribbon(aes(ymin=`quant_2.5`,ymax=`quant_97.5`,fill=hightau), color ="transparent",
+  #             alpha = 0.25) +
+  geom_vline(aes(xintercept = 17)) +
+  ggsci::scale_fill_aaas() +
+  ggsci::scale_color_aaas()
