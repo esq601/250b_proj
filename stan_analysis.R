@@ -3,7 +3,7 @@ library(tidyverse)
 library(patchwork)
 library(rstanarm)
 
-fit <- readRDS("fit.rds")
+fit <- readRDS("fit2022-05-07.rds")
 print(fit)
 
 mcmc_chain = as.matrix(fit)
@@ -241,3 +241,65 @@ ggsave("densplot.png",dpi = 320, width = 12, height =6)
 
 
 
+### with params ####
+
+mcmc_chain_df <- as.data.frame(mcmc_chain)
+L <- 208
+W <- 2
+j <- L/2
+mcmc_chain_df[1,2]
+for(i in 1:nrow(mcmc_chain_df)) {
+  
+  for(k in 1:30){
+    mcmc_chain_df[i,6+k] <- R_g(j,L,W,k,mcmc_chain_df[i,2],mcmc_chain_df[i,1],mcmc_chain_df[i,3],mcmc_chain_df[i,4])
+  }
+  
+  
+  
+  
+}
+
+
+
+summary(mcmc_chain_df$V7)
+ggplot(mcmc_chain_df) +
+  geom_histogram(aes(x=V7))
+
+
+mcmc_chain_df <- mcmc_chain_df %>%
+  select(-pred)
+
+cordf <- cor(mcmc_chain_df)
+
+corrplot::corrplot(cordf)
+
+ggplot(mcmc_chain_df) +
+  geom_point(aes(x=lp__, y = V7))
+
+names <-paste0(seq(1:30))
+
+
+reldf <- mcmc_chain_df %>%
+  select(7:36) %>%
+  rename_all(~names) %>%
+  pivot_longer(everything()) %>%
+  group_by(name) %>%
+  summarise(mean_val = mean(value),
+            med_val = median(value),
+            stdev = sqrt(var(value)),
+            `quant_2.5` = quantile(value,.025),
+            quant_10 = quantile(value,.1),
+            quant_90 = quantile(value,.9),
+            `quant_97.5` = quantile(value,.975)) %>%
+  mutate(year = as.numeric(name)) %>%
+  ungroup() %>%
+  arrange(year)
+
+ggplot(reldf,aes(x=year)) +
+  geom_path(aes(y=med_val)) +
+  geom_ribbon(aes(ymin=quant_10,ymax=quant_90), color ="transparent",
+              fill = "darkblue", alpha = 0.5) +
+  geom_ribbon(aes(ymin=`quant_2.5`,ymax=`quant_97.5`), color ="transparent",
+              fill = "darkblue", alpha = 0.25) +
+  geom_vline(aes(xintercept = 17))
+  scale_y_continuous(limits = c(0,1))
