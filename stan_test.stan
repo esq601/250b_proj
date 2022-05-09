@@ -151,7 +151,7 @@ data {
 // The parameters accepted by the model. Our model
 // accepts two parameters 'mu' and 'sigma'.
 parameters {
-  real<lower=0, upper = .004> lambda;
+  real<lower=0, upper = .01> lambda;
   real<lower=5, upper = 40> tau;
   real<lower=1, upper = 5> alpha_var;
   real<lower=25, upper = 600> beta_var;

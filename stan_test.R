@@ -2,8 +2,8 @@ library(rstan)
 library(tidyverse)
 
 options(mc.cores = parallel::detectCores())
-
-dat <- read_csv("data.csv") %>%
+parallel::detectCores()
+dat <- read_csv("data_new.csv") %>%
   mutate(Y = 1, j = floor((w-1)*(l/w)))
 len <- nrow(dat)
 
@@ -12,7 +12,7 @@ dat1 <- data.frame()
 
 for(i in 1:nrow(dat)) {
   
-  temp <- matrix(rep(c(dat[[i,4]],dat[[i,5]],dat[[i,6]],dat[[i,9]]),dat[[i,3]]),nrow = dat[[i,3]],byrow = TRUE)
+  temp <- matrix(rep(c(dat[[i,3]],dat[[i,4]],dat[[i,5]],dat[[i,14]]),dat[[i,2]]),nrow = dat[[i,2]],byrow = TRUE)
   
   dat1 <- bind_rows(dat1,data.frame(temp))
   
@@ -23,9 +23,9 @@ len <- nrow(dat1)
 fit <- stan(
   file = "stan_test.stan",
   data = list(rtg_years=dat1$rtg_years,l=dat1$l,w=dat1$w,j = dat1$j, LENGTH = len),
-  warmup = 750,
-  iter = 1500,
-  chains = 8
+  warmup = 1000,
+  iter = 2000,
+  chains = parallel::detectCores()
 )
 
-saveRDS(fit, "fit.rds")
+saveRDS(fit, paste0("fit",Sys.Date(),".rds"))
